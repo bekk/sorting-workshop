@@ -10,6 +10,7 @@ export class AudioManager {
 
   constructor() {
     this.audioContext = new AudioContext();
+    this.audioContext.suspend();
   }
 
   play({
@@ -29,5 +30,13 @@ export class AudioManager {
 
     oscillator.start(this.audioContext.currentTime);
     oscillator.stop(this.audioContext.currentTime + durationMs / 1000);
+  }
+
+  enable() {
+    this.audioContext.resume();
+  }
+
+  disable() {
+    this.audioContext.suspend();
   }
 }

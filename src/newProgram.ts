@@ -4,17 +4,20 @@ import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { checkSorted, VisualArray } from "./VisualArray";
 import { bubbleSort } from "./bubbleSort";
+import { mergeSort } from "./mergeSort";
 
 export function run(p5: P5) {
   let array: number[];
   const swapped = new Set<number>();
   const gotten = new Set<number>();
+  let audioManager: AudioManager;
 
   p5.setup = () => {
     p5.createCanvas(800, 500);
 
     const pubsub = new PubSub();
-    const audioManager = new AudioManager();
+    audioManager = new AudioManager();
+    setupSoundSwitch();
     array = Array(600)
       .fill(null)
       .map((_, i) => 600 - i);
@@ -54,7 +57,7 @@ export function run(p5: P5) {
       });
     });
 
-    bubbleSort(visualArray).then(() => checkSorted(visualArray));
+    mergeSort(visualArray).then(() => checkSorted(visualArray));
   };
 
   p5.draw = () => {
@@ -77,4 +80,18 @@ export function run(p5: P5) {
       );
     });
   };
+
+  function setupSoundSwitch() {
+    const soundSwitch = document.getElementById(
+      "soundSwitch"
+    ) as HTMLInputElement;
+    soundSwitch.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.checked) {
+        audioManager.enable();
+      } else {
+        audioManager.disable();
+      }
+    });
+  }
 }
