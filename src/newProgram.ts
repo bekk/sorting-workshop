@@ -2,20 +2,22 @@ import P5 from "p5";
 import { AudioManager } from "./AudioManager";
 import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
-import { bubbleSort, VisualArray } from "./VisualArray";
+import { checkSorted, VisualArray } from "./VisualArray";
+import { bubbleSort } from "./bubbleSort";
 
 export function run(p5: P5) {
   let array: number[];
   const swapped = new Set<number>();
   const gotten = new Set<number>();
+
   p5.setup = () => {
     p5.createCanvas(800, 500);
 
     const pubsub = new PubSub();
     const audioManager = new AudioManager();
-    array = Array(50)
+    array = Array(600)
       .fill(null)
-      .map((_, i) => 50 - i);
+      .map((_, i) => 600 - i);
     const frequencyMapper = getFrequencyMapper({
       minValue: Math.min(...array),
       maxValue: Math.max(...array),
@@ -29,6 +31,8 @@ export function run(p5: P5) {
       const frequency = frequencyMapper(array[index]);
       swapped.add(index);
       audioManager.play({ frequency, durationMs: 10 });
+    });
+
     pubsub.subscribe("get", async ({ payload }) => {
       const { index } = payload;
       const frequency = frequencyMapper(array[index]);
@@ -50,7 +54,7 @@ export function run(p5: P5) {
       });
     });
 
-    bubbleSort(visualArray);
+    bubbleSort(visualArray).then(() => checkSorted(visualArray));
   };
 
   p5.draw = () => {

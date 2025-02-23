@@ -11,23 +11,36 @@ export class VisualArray {
     this.length = array.length;
   }
 
+  private assertIndex(i: number, name?: string) {
+    if (i < 0 || i >= this.length) {
+      throw new Error(`Index ${name ?? "i"} out of bounds ${i}`);
+    }
+  }
+
   async get(i: number): Promise<number> {
+    this.assertIndex(i);
     await this.pubsub.publish({ type: "get", payload: { index: i } });
+    await this.wait();
     return this.array[i];
   }
 
   async set(i: number, value: number): Promise<void> {
+    this.assertIndex(i);
     await this.pubsub.publish({ type: "set", payload: { index: i, value } });
     await this.wait();
     this.array[i] = value;
   }
 
   async compare(i: number, j: number): Promise<number> {
+    this.assertIndex(i, "i");
+    this.assertIndex(j, "j");
     await this.pubsub.publish({ type: "compare", payload: { i, j } });
     return this.array[i] - this.array[j];
   }
 
   async swap(i: number, j: number): Promise<void> {
+    this.assertIndex(i, "i");
+    this.assertIndex(j, "j");
     await this.pubsub.publish({ type: "swap", payload: { i, j } });
     await this.wait();
     [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
@@ -38,12 +51,8 @@ export class VisualArray {
   }
 }
 
-export async function bubbleSort(array: VisualArray) {
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array.length - i - 1; j++) {
-      if ((await array.compare(j, j + 1)) > 0) {
-        await array.swap(j, j + 1);
-      }
-    }
+export async function checkSorted(array: VisualArray) {
+  for (let i = 0; i < array.length - 1; i++) {
+    await array.get(i);
   }
 }
