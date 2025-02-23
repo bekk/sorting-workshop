@@ -1,5 +1,3 @@
-import P5 from "p5";
-
 export interface EventBase<TType extends string, TPayload = never> {
   type: TType;
   payload: TPayload;
