@@ -7,6 +7,8 @@ export type Events = {
   swap: { i: number; j: number };
   mute: undefined;
   unmute: undefined;
+  cancelSort: undefined;
+  startSort: undefined;
 };
 
 export class PubSub extends PubSubBase<Events> {}

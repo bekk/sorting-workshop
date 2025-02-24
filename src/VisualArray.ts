@@ -4,16 +4,27 @@ export class VisualArray {
   private pubsub: PubSub;
   private array: number[];
   length: number;
+  private isCancelled = false;
 
   constructor(pubsub: PubSub, array: number[]) {
     this.pubsub = pubsub;
     this.array = array;
     this.length = array.length;
+
+    pubsub.subscribe("cancelSort", () => {
+      this.isCancelled = true;
+    });
   }
 
   private assertIndex(i: number, name?: string) {
     if (i < 0 || i >= this.length) {
       throw new Error(`Index ${name ?? "i"} out of bounds ${i}`);
+    }
+  }
+
+  private checkCancelled() {
+    if (this.isCancelled) {
+      throw new Error("Operation cancelled");
     }
   }
 
@@ -47,6 +58,7 @@ export class VisualArray {
   }
 
   async wait() {
+    this.checkCancelled();
     await new Promise((resolve) => setTimeout(resolve, 1));
   }
 }

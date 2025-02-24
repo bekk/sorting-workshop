@@ -3,30 +3,63 @@ import { AudioManager } from "./AudioManager";
 import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { checkSorted, VisualArray } from "./VisualArray";
+import { rangeAndInput } from "./components/rangeAndInput";
 import { bubbleSort } from "./bubbleSort";
 
 export function run(p5: P5) {
   let array: number[];
   const swapped = new Set<number>();
   const gotten = new Set<number>();
+  const pubsub = new PubSub();
   let audioManager: AudioManager;
+
+  function run() {
+    const visualArray = new VisualArray(pubsub, array);
+    bubbleSort(visualArray).then(() => checkSorted(visualArray));
+  }
 
   p5.setup = () => {
     p5.createCanvas(800, 500);
 
-    const pubsub = new PubSub();
     audioManager = new AudioManager();
     setupSoundSwitch(pubsub);
-    array = Array(600)
-      .fill(null)
-      .map((_, i) => 600 - i);
+    rangeAndInput(document.getElementById("amountInput")!, {
+      min: 0,
+      max: 1000,
+      step: 1,
+      startingValue: 600,
+      onChange: (value) => {
+        pubsub.publish("cancelSort");
+        array = Array(value)
+          .fill(null)
+          .map((_, i) => value - i);
+      },
+    });
+    array = shuffled(600);
     const frequencyMapper = getFrequencyMapper({
       minValue: Math.min(...array),
       maxValue: Math.max(...array),
       minFrequency: 400,
       maxFrequency: 2000,
     });
-    const visualArray = new VisualArray(pubsub, array);
+
+    document.getElementById("runButton")!.addEventListener("click", () => {
+      pubsub.publish("startSort");
+    });
+    document.getElementById("stopButton")!.addEventListener("click", () => {
+      pubsub.publish("cancelSort");
+    });
+
+    document.getElementById("reverseButton")!.addEventListener("click", () => {
+      pubsub.publish("cancelSort");
+      array = reversed(array.length);
+    });
+    document.getElementById("randomButton")!.addEventListener("click", () => {
+      pubsub.publish("cancelSort");
+      array = shuffled(array.length);
+    });
+
+    pubsub.subscribe("startSort", () => run());
 
     pubsub.subscribe("set", ({ index }) => {
       const frequency = frequencyMapper(array[index]);
@@ -55,14 +88,13 @@ export function run(p5: P5) {
 
     pubsub.subscribe("mute", () => audioManager.enable());
     pubsub.subscribe("unmute", () => audioManager.disable());
-
-    bubbleSort(visualArray).then(() => checkSorted(visualArray));
   };
 
   p5.draw = () => {
     p5.background(0);
     const width = p5.width / array.length;
     array.forEach((value, i) => {
+      p5.noStroke();
       p5.fill(255);
       if (swapped.has(i)) {
         p5.fill(255, 0, 0);
@@ -79,6 +111,19 @@ export function run(p5: P5) {
       );
     });
   };
+}
+
+function reversed(n: number) {
+  return Array(n)
+    .fill(null)
+    .map((_, i) => n - i);
+}
+
+function shuffled(n: number) {
+  return Array(n)
+    .fill(null)
+    .map((_, i) => i)
+    .sort(() => Math.random() - 0.5);
 }
 
 function setupSoundSwitch(pubsub: PubSub) {
