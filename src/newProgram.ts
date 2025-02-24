@@ -8,8 +8,8 @@ import { bubbleSort } from "./bubbleSort";
 
 export function run(p5: P5) {
   let array: number[];
-  const swapped = new Set<number>();
-  const gotten = new Set<number>();
+  const tempHighlights: Map<number, P5.Color> = new Map();
+  const highlights: Map<number, P5.Color> = new Map();
   const pubsub = new PubSub();
   let audioManager: AudioManager;
 
@@ -44,6 +44,7 @@ export function run(p5: P5) {
     });
 
     document.getElementById("runButton")!.addEventListener("click", () => {
+      pubsub.publish("cancelSort");
       pubsub.publish("startSort");
     });
     document.getElementById("stopButton")!.addEventListener("click", () => {
@@ -61,21 +62,29 @@ export function run(p5: P5) {
 
     pubsub.subscribe("startSort", () => run());
 
+    pubsub.subscribe("highlightOnce", ({ index, color }) => {
+      tempHighlights.set(index, p5.color(color));
+    });
+
+    pubsub.subscribe("setHighlight", ({ index, color }) => {
+      highlights.set(index, p5.color(color));
+    });
+
+    pubsub.subscribe("clearHighlight", ({ index }) => {
+      highlights.delete(index);
+    });
+
     pubsub.subscribe("set", ({ index }) => {
       const frequency = frequencyMapper(array[index]);
-      swapped.add(index);
       audioManager.play({ frequency, durationMs: 10 });
     });
 
     pubsub.subscribe("get", ({ index }) => {
       const frequency = frequencyMapper(array[index]);
-      gotten.add(index);
       audioManager.play({ frequency, durationMs: 10 });
     });
 
     pubsub.subscribe("swap", ({ i, j }) => {
-      swapped.add(i);
-      swapped.add(j);
       audioManager.play({
         frequency: frequencyMapper(array[i]),
         durationMs: 10,
@@ -95,14 +104,7 @@ export function run(p5: P5) {
     const width = p5.width / array.length;
     array.forEach((value, i) => {
       p5.noStroke();
-      p5.fill(255);
-      if (swapped.has(i)) {
-        p5.fill(255, 0, 0);
-        swapped.delete(i);
-      } else if (gotten.has(i)) {
-        p5.fill(0, 255, 0);
-        gotten.delete(i);
-      }
+      p5.fill(tempHighlights.get(i) ?? highlights.get(i) ?? p5.color(255));
       p5.rect(
         i * width,
         p5.height,
@@ -110,6 +112,7 @@ export function run(p5: P5) {
         p5.map(value, 0, array.length, 0, -p5.height)
       );
     });
+    tempHighlights.clear();
   };
 }
 

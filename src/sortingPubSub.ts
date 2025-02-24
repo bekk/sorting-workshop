@@ -5,6 +5,9 @@ export type Events = {
   set: { index: number; value: number };
   compare: { i: number; j: number };
   swap: { i: number; j: number };
+  highlightOnce: { index: number; color: string };
+  setHighlight: { index: number; color: string };
+  clearHighlight: { index: number };
   mute: undefined;
   unmute: undefined;
   cancelSort: undefined;

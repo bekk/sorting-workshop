@@ -31,6 +31,7 @@ export class VisualArray {
   async get(i: number): Promise<number> {
     this.assertIndex(i);
     await this.pubsub.publish("get", { index: i });
+    this.highlightOnce(i, "green");
     await this.wait();
     return this.array[i];
   }
@@ -45,6 +46,8 @@ export class VisualArray {
   async compare(i: number, j: number): Promise<number> {
     this.assertIndex(i, "i");
     this.assertIndex(j, "j");
+    this.highlightOnce(i);
+    this.highlightOnce(j);
     await this.pubsub.publish("compare", { i, j });
     return this.array[i] - this.array[j];
   }
@@ -53,6 +56,8 @@ export class VisualArray {
     this.assertIndex(i, "i");
     this.assertIndex(j, "j");
     await this.pubsub.publish("swap", { i, j });
+    this.highlightOnce(i);
+    this.highlightOnce(j);
     await this.wait();
     [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
   }
@@ -61,10 +66,23 @@ export class VisualArray {
     this.checkCancelled();
     await new Promise((resolve) => setTimeout(resolve, 1));
   }
+
+  highlightOnce(index: number, color?: string) {
+    this.pubsub.publish("highlightOnce", { index, color: color ?? "red" });
+  }
+
+  setHighlight(index: number, color?: string) {
+    this.pubsub.publish("setHighlight", { index, color: color ?? "green" });
+  }
+
+  clearHighlight(index: number) {
+    this.pubsub.publish("clearHighlight", { index });
+  }
 }
 
 export async function checkSorted(array: VisualArray) {
   for (let i = 0; i < array.length - 1; i++) {
-    await array.get(i);
+    array.setHighlight(i, "green");
+    await new Promise((resolve) => setTimeout(resolve, 5));
   }
 }
