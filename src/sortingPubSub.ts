@@ -1,8 +1,12 @@
-import { EventBase, PubSubBase as PubSubBase } from "./pubsub/event";
+import { PubSubBase } from "./pubsub/event";
 
-export type Event =
-  | EventBase<"get", { index: number }>
-  | EventBase<"set", { index: number; value: number }>
-  | EventBase<"compare", { i: number; j: number }>
-  | EventBase<"swap", { i: number; j: number }>;
-export class PubSub extends PubSubBase<Event> {}
+export type Events = {
+  get: { index: number };
+  set: { index: number; value: number };
+  compare: { i: number; j: number };
+  swap: { i: number; j: number };
+  mute: undefined;
+  unmute: undefined;
+};
+
+export class PubSub extends PubSubBase<Events> {}

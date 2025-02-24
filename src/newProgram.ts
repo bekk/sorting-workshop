@@ -4,7 +4,6 @@ import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { checkSorted, VisualArray } from "./VisualArray";
 import { bubbleSort } from "./bubbleSort";
-import { mergeSort } from "./mergeSort";
 
 export function run(p5: P5) {
   let array: number[];
@@ -17,7 +16,7 @@ export function run(p5: P5) {
 
     const pubsub = new PubSub();
     audioManager = new AudioManager();
-    setupSoundSwitch();
+    setupSoundSwitch(pubsub);
     array = Array(600)
       .fill(null)
       .map((_, i) => 600 - i);
@@ -29,22 +28,19 @@ export function run(p5: P5) {
     });
     const visualArray = new VisualArray(pubsub, array);
 
-    pubsub.subscribe("set", async ({ payload }) => {
-      const { index } = payload;
+    pubsub.subscribe("set", ({ index }) => {
       const frequency = frequencyMapper(array[index]);
       swapped.add(index);
       audioManager.play({ frequency, durationMs: 10 });
     });
 
-    pubsub.subscribe("get", async ({ payload }) => {
-      const { index } = payload;
+    pubsub.subscribe("get", ({ index }) => {
       const frequency = frequencyMapper(array[index]);
       gotten.add(index);
       audioManager.play({ frequency, durationMs: 10 });
     });
 
-    pubsub.subscribe("swap", async ({ payload }) => {
-      const { i, j } = payload;
+    pubsub.subscribe("swap", ({ i, j }) => {
       swapped.add(i);
       swapped.add(j);
       audioManager.play({
@@ -57,7 +53,10 @@ export function run(p5: P5) {
       });
     });
 
-    mergeSort(visualArray).then(() => checkSorted(visualArray));
+    pubsub.subscribe("mute", () => audioManager.enable());
+    pubsub.subscribe("unmute", () => audioManager.disable());
+
+    bubbleSort(visualArray).then(() => checkSorted(visualArray));
   };
 
   p5.draw = () => {
@@ -80,18 +79,18 @@ export function run(p5: P5) {
       );
     });
   };
+}
 
-  function setupSoundSwitch() {
-    const soundSwitch = document.getElementById(
-      "soundSwitch"
-    ) as HTMLInputElement;
-    soundSwitch.addEventListener("change", (e) => {
-      const target = e.target as HTMLInputElement;
-      if (target.checked) {
-        audioManager.enable();
-      } else {
-        audioManager.disable();
-      }
-    });
-  }
+function setupSoundSwitch(pubsub: PubSub) {
+  const soundSwitch = document.getElementById(
+    "soundSwitch"
+  ) as HTMLInputElement;
+  soundSwitch.addEventListener("change", (e) => {
+    const target = e.target as HTMLInputElement;
+    if (target.checked) {
+      pubsub.publish("mute");
+    } else {
+      pubsub.publish("unmute");
+    }
+  });
 }
