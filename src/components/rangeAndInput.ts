@@ -34,19 +34,19 @@ export function rangeAndInput(
   const range = target.querySelector("input[type=range]") as HTMLInputElement;
   const input = target.querySelector("input[type=text]") as HTMLInputElement;
 
-  range.addEventListener("input", (e) => {
+  range.oninput = () => {
     const parsedValue = parseValue(range.value);
     if (parsedValue === undefined) return;
     input.value = parsedValue.toFixed(2);
     options.onChange?.(parsedValue);
-  });
+  };
 
-  input.addEventListener("input", (e) => {
+  input.oninput = () => {
     const parsedValue = parseValue(input.value);
     if (parsedValue === undefined) return;
     range.value = parsedValue.toString();
     options.onChange?.(parsedValue);
-  });
+  };
 
   input.onblur = () => {
     input.value = parseValue(input.value)?.toFixed(2) ?? "";
