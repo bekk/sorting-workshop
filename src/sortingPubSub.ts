@@ -1,3 +1,4 @@
+import { ArrayInitMethod } from "./arrayInitialize";
 import { PubSubBase } from "./pubsub";
 import { SortFunctionName } from "./sortFunctions";
 
@@ -11,6 +12,7 @@ export type Events = {
   clearHighlight: { index: number };
   clearHighlights: undefined;
   setSortAlgorithm: { algorithm: SortFunctionName };
+  setArrayInitMethod: { method: ArrayInitMethod };
   mute: undefined;
   unmute: undefined;
   cancelSort: undefined;

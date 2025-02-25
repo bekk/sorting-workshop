@@ -11,6 +11,8 @@ import {
 } from "./visualArray/visualArrayImplementation";
 import { setupMuteButton } from "./components/muteButton";
 import { setupAlgoSelect } from "./components/algorithmSelect";
+import { setupInitTypeRadioButtons } from "./components/initTypeRadio";
+import { ArrayInitMethod, initializeArray } from "./arrayInitialize";
 
 export function run(p5: P5) {
   let array: number[];
@@ -19,6 +21,7 @@ export function run(p5: P5) {
   const highlights: Map<number, P5.Color> = new Map();
   const pubsub = new PubSub();
   let audioManager: AudioManager;
+  let arrayInitMethod: ArrayInitMethod = "shuffled";
 
   function run() {
     const visualArray = new VisualArrayImplementation(pubsub, array);
@@ -32,7 +35,7 @@ export function run(p5: P5) {
   }
 
   p5.setup = () => {
-    p5.createCanvas(1000, 800);
+    p5.createCanvas(1000, 720);
 
     audioManager = new AudioManager();
     setupMuteButton(pubsub);
@@ -43,13 +46,12 @@ export function run(p5: P5) {
       startingValue: 600,
       onChange: (value) => {
         pubsub.publish("cancelSort");
-        array = Array(value)
-          .fill(null)
-          .map((_, i) => value - i);
+        array = initializeArray(value, arrayInitMethod);
       },
     });
     setupAlgoSelect(pubsub);
-    array = shuffled(600);
+    setupInitTypeRadioButtons(pubsub);
+    array = initializeArray(600, arrayInitMethod);
     const frequencyMapper = getFrequencyMapper({
       minValue: Math.min(...array),
       maxValue: Math.max(...array),
@@ -65,16 +67,11 @@ export function run(p5: P5) {
       reset();
     });
 
-    document.getElementById("reverseButton")!.addEventListener("click", () => {
-      reset();
-      array = reversed(array.length);
-    });
-    document.getElementById("randomButton")!.addEventListener("click", () => {
-      reset();
-      array = shuffled(array.length);
-    });
-
     pubsub.subscribe("startSort", () => run());
+    pubsub.subscribe("setArrayInitMethod", ({ method }) => {
+      arrayInitMethod = method;
+      array = initializeArray(array.length, method);
+    });
 
     pubsub.subscribe("highlightOnce", ({ index, color }) => {
       tempHighlights.set(index, p5.color(color));
@@ -134,17 +131,4 @@ export function run(p5: P5) {
     });
     tempHighlights.clear();
   };
-}
-
-function reversed(n: number) {
-  return Array(n)
-    .fill(null)
-    .map((_, i) => n - i);
-}
-
-function shuffled(n: number) {
-  return Array(n)
-    .fill(null)
-    .map((_, i) => i)
-    .sort(() => Math.random() - 0.5);
 }
