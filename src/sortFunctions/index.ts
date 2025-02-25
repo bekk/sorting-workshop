@@ -1,4 +1,4 @@
-import { VisualArray } from "../VisualArray";
+import { VisualArray } from "../visualArray";
 import { sortFunctions } from "./_registerSortFunctions";
 
 export type SortFunction = (array: VisualArray) => Promise<void>;

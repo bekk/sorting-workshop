@@ -9,6 +9,7 @@ export type Events = {
   highlightOnce: { index: number; color: string };
   setHighlight: { index: number; color: string };
   clearHighlight: { index: number };
+  clearHighlights: undefined;
   setSortAlgorithm: { algorithm: SortFunctionName };
   mute: undefined;
   unmute: undefined;

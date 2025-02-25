@@ -1,6 +1,7 @@
-import { PubSub } from "./sortingPubSub";
+import { VisualArray } from ".";
+import { PubSub } from "../sortingPubSub";
 
-export class VisualArray {
+export class VisualArrayImplementation implements VisualArray {
   private pubsub: PubSub;
   private array: number[];
   length: number;
@@ -62,7 +63,7 @@ export class VisualArray {
     [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
   }
 
-  async wait() {
+  private async wait() {
     this.checkCancelled();
     await new Promise((resolve) => setTimeout(resolve, 1));
   }
@@ -77,6 +78,9 @@ export class VisualArray {
 
   clearHighlight(index: number) {
     this.pubsub.publish("clearHighlight", { index });
+  }
+  clearHighlights() {
+    this.pubsub.publish("clearHighlights");
   }
 }
 

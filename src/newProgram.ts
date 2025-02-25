@@ -2,12 +2,15 @@ import P5 from "p5";
 import { AudioManager } from "./AudioManager";
 import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
-import { checkSorted, VisualArray } from "./VisualArray";
 import { rangeAndInput } from "./components/rangeAndInput";
 import { select } from "./components/select";
 import { sortFunctions } from "./sortFunctions/_registerSortFunctions";
 import { bubbleSort } from "./sortFunctions/bubbleSort";
 import { isSortFunctionName } from "./sortFunctions";
+import {
+  checkSorted,
+  VisualArrayImplementation,
+} from "./visualArray/visualArrayImplementation";
 
 export function run(p5: P5) {
   let array: number[];
@@ -18,7 +21,7 @@ export function run(p5: P5) {
   let audioManager: AudioManager;
 
   function run() {
-    const visualArray = new VisualArray(pubsub, array);
+    const visualArray = new VisualArrayImplementation(pubsub, array);
     sortAlgorithm(visualArray).then(() => checkSorted(visualArray));
   }
 

@@ -14,26 +14,28 @@ export function rangeAndInput(
 ) {
   const id = "customRange3";
 
-  target.innerHTML = html` <div class="row">
-    <label for="${id}" class="form-label">Antall elementer</label>
-    <div class="col-2">
-      <input
-        class="form-control"
-        type="text"
-        aria-label="Amount (to the nearest dollar)"
-      />
-    </div>
-    <div class="col-10">
-      <input
-        class="form-range"
-        type="range"
-        min="${options.min}"
-        max="${options.max}"
-        step="${options.step}"
-        id="${id}"
-      />
-    </div>
-  </div>`;
+  target.innerHTML = html` <label for="${id}" class="form-label"
+      >Antall elementer</label
+    >
+    <div class="row g-1">
+      <div class="col-2">
+        <input
+          class="form-control"
+          type="text"
+          aria-label="Amount (to the nearest dollar)"
+        />
+      </div>
+      <div class="col-10 d-flex align-items-center">
+        <input
+          class="form-range vertical-align-middle"
+          type="range"
+          min="${options.min}"
+          max="${options.max}"
+          step="${options.step}"
+          id="${id}"
+        />
+      </div>
+    </div>`;
 
   const range = target.querySelector("input[type=range]") as HTMLInputElement;
   const input = target.querySelector("input[type=text]") as HTMLInputElement;
