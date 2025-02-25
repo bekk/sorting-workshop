@@ -70,6 +70,7 @@ export function run(p5: P5) {
     pubsub.subscribe("startSort", () => run());
     pubsub.subscribe("setArrayInitMethod", ({ method }) => {
       arrayInitMethod = method;
+      reset();
       array = initializeArray(array.length, method);
     });
 
