@@ -33,7 +33,7 @@ export class VisualArrayImplementation implements VisualArray {
     this.assertIndex(i);
     this.pubsub.publish("get", { index: i });
     this.highlightOnce(i, "green");
-    await this.wait();
+    await this.wait(0);
     return this.array[i];
   }
 
@@ -50,6 +50,7 @@ export class VisualArrayImplementation implements VisualArray {
     this.highlightOnce(i);
     this.highlightOnce(j);
     this.pubsub.publish("compare", { i, j });
+    await this.wait(0);
     return this.array[i] - this.array[j];
   }
 
@@ -63,9 +64,9 @@ export class VisualArrayImplementation implements VisualArray {
     [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
   }
 
-  private async wait() {
+  private async wait(time: number = 1) {
     this.checkCancelled();
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, time));
   }
 
   highlightOnce(index: number, color?: string) {
