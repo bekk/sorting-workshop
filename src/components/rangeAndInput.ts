@@ -14,30 +14,36 @@ export function rangeAndInput(
 ) {
   const id = "customRange3";
 
-  target.innerHTML = html` <div>
-    <label for="${id}" class="form-label">Example range</label>
-    <input
-      type="range"
-      class="form-range"
-      min="${options.min}"
-      max="${options.max}"
-      step="${options.step}"
-      id="${id}"
-    />
-    <input
-      type="text"
-      class="form-control"
-      aria-label="Amount (to the nearest dollar)"
-    />
+  target.innerHTML = html` <div class="row">
+    <label for="${id}" class="form-label">Antall elementer</label>
+    <div class="col-2">
+      <input
+        class="form-control"
+        type="text"
+        aria-label="Amount (to the nearest dollar)"
+      />
+    </div>
+    <div class="col-10">
+      <input
+        class="form-range"
+        type="range"
+        min="${options.min}"
+        max="${options.max}"
+        step="${options.step}"
+        id="${id}"
+      />
+    </div>
   </div>`;
 
   const range = target.querySelector("input[type=range]") as HTMLInputElement;
   const input = target.querySelector("input[type=text]") as HTMLInputElement;
+  range.value = options.startingValue.toString();
+  input.value = options.startingValue.toFixed(0);
 
   range.oninput = () => {
     const parsedValue = parseValue(range.value);
     if (parsedValue === undefined) return;
-    input.value = parsedValue.toFixed(2);
+    input.value = parsedValue.toFixed(0);
     options.onChange?.(parsedValue);
   };
 
