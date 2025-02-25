@@ -121,7 +121,6 @@ export function run(p5: P5) {
     pubsub.subscribe("unmute", () => audioManager.disable());
 
     pubsub.subscribe("setSortAlgorithm", ({ algorithm }) => {
-      console.log("setSortAlgorithm", algorithm);
       sortAlgorithm = sortFunctions[algorithm];
       reset();
     });
