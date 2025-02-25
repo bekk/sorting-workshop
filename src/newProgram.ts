@@ -43,7 +43,7 @@ export function run(p5: P5) {
       min: 0,
       max: 1000,
       step: 1,
-      startingValue: 600,
+      startingValue: 500,
       onChange: (value) => {
         pubsub.publish("cancelSort");
         array = initializeArray(value, arrayInitMethod);
@@ -51,7 +51,7 @@ export function run(p5: P5) {
     });
     setupAlgoSelect(pubsub);
     setupInitTypeRadioButtons(pubsub);
-    array = initializeArray(600, arrayInitMethod);
+    array = initializeArray(500, arrayInitMethod);
     const frequencyMapper = getFrequencyMapper({
       minValue: Math.min(...array),
       maxValue: Math.max(...array),
