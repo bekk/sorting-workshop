@@ -1,4 +1,4 @@
-import { PubSubBase } from "./pubsub/event";
+import { PubSubBase } from "./pubsub";
 import { SortFunctionName } from "./sortFunctions";
 
 export type Events = {
