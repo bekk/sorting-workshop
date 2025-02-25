@@ -87,7 +87,7 @@ export class VisualArrayImplementation implements VisualArray {
 
 export async function checkSorted(array: VisualArray) {
   for (let i = 0; i < array.length - 1; i++) {
+    await array.get(i);
     array.setHighlight(i, "green");
-    await new Promise((resolve) => setTimeout(resolve, 5));
   }
 }
