@@ -30,7 +30,7 @@ export class VisualArray {
 
   async get(i: number): Promise<number> {
     this.assertIndex(i);
-    await this.pubsub.publish("get", { index: i });
+    this.pubsub.publish("get", { index: i });
     this.highlightOnce(i, "green");
     await this.wait();
     return this.array[i];
@@ -38,7 +38,7 @@ export class VisualArray {
 
   async set(i: number, value: number): Promise<void> {
     this.assertIndex(i);
-    await this.pubsub.publish("set", { index: i, value });
+    this.pubsub.publish("set", { index: i, value });
     await this.wait();
     this.array[i] = value;
   }
@@ -48,14 +48,14 @@ export class VisualArray {
     this.assertIndex(j, "j");
     this.highlightOnce(i);
     this.highlightOnce(j);
-    await this.pubsub.publish("compare", { i, j });
+    this.pubsub.publish("compare", { i, j });
     return this.array[i] - this.array[j];
   }
 
   async swap(i: number, j: number): Promise<void> {
     this.assertIndex(i, "i");
     this.assertIndex(j, "j");
-    await this.pubsub.publish("swap", { i, j });
+    this.pubsub.publish("swap", { i, j });
     this.highlightOnce(i);
     this.highlightOnce(j);
     await this.wait();
