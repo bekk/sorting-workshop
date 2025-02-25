@@ -1,5 +1,7 @@
 # Sorteringsworkshop
 
+![Skjermdump](images/screenshot.png)
+
 ## Installasjon og oppsett
 
 Installer det du trenger ved å kjøre
