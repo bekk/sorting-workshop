@@ -3,15 +3,14 @@ import { AudioManager } from "./AudioManager";
 import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { rangeAndInput } from "./components/rangeAndInput";
-import { select } from "./components/select";
 import { sortFunctions } from "./sortFunctions/_registerSortFunctions";
 import { bubbleSort } from "./sortFunctions/bubbleSort";
-import { isSortFunctionName } from "./sortFunctions";
 import {
   checkSorted,
   VisualArrayImplementation,
 } from "./visualArray/visualArrayImplementation";
 import { setupMuteButton } from "./components/muteButton";
+import { setupAlgoSelect } from "./components/algorithmSelect";
 
 export function run(p5: P5) {
   let array: number[];
@@ -148,20 +147,4 @@ function shuffled(n: number) {
     .fill(null)
     .map((_, i) => i)
     .sort(() => Math.random() - 0.5);
-}
-
-function setupAlgoSelect(pubsub: PubSub) {
-  const element = document.getElementById("algoSelect")!;
-  select(element, {
-    options: Object.entries(sortFunctions).map(([name, _]) => ({
-      value: name,
-      text: name,
-    })),
-    onChange: (algorithm: string) => {
-      if (!isSortFunctionName(algorithm)) {
-        throw new Error(`Invalid algorithm: ${algorithm}`);
-      }
-      pubsub.publish("setSortAlgorithm", { algorithm });
-    },
-  });
 }
