@@ -106,6 +106,16 @@ export function run(p5: P5) {
         durationMs: 10,
       });
     });
+    pubsub.subscribe("compare", ({ i, j }) => {
+      audioManager.play({
+        frequency: frequencyMapper(array[i]),
+        durationMs: 10,
+      });
+      audioManager.play({
+        frequency: frequencyMapper(array[j]),
+        durationMs: 10,
+      });
+    });
 
     pubsub.subscribe("mute", () => audioManager.enable());
     pubsub.subscribe("unmute", () => audioManager.disable());
