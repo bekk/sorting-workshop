@@ -10,21 +10,31 @@
     <h1>Sorteringsworkshop</h1>
     <div id="app" class="d-flex justify-content-center"></div>
     <div class="container">
-      <div class="form-check form-switch">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          role="switch"
-          id="soundSwitch"
-        />
-        <label class="form-check-label" for="soundSwitch">Lyd</label>
+      <div class="d-flex justify-content-between">
+        <div id="algoSelect"></div>
+
+        <div>
+          <button id="runButton" type="button" class="btn btn-primary">
+            Run
+          </button>
+          <button id="stopButton" type="button" class="btn btn-primary">
+            Stop
+          </button>
+        </div>
+        <div id="soundButton">
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btn-check-outlined"
+            autocomplete="off"
+          />
+          <label class="btn btn-outline-primary" for="btn-check-outlined">
+            <i class="bi bi-volume-mute"></i>
+          </label>
+        </div>
       </div>
       <div id="amountInput"></div>
-      <div id="algoSelect"></div>
-      <button id="runButton" type="button" class="btn btn-primary">Run</button>
-      <button id="stopButton" type="button" class="btn btn-primary">
-        Stop
-      </button>
+      <label>Generering</label>
       <div class="btn-group" role="group" aria-label="Basic example">
         <button id="reverseButton" type="button" class="btn btn-primary">
           Revers

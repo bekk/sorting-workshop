@@ -1,5 +1,6 @@
 import { run } from "./newProgram.ts";
 import "./style.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import P5 from "p5";
 
 export type P5Closure = (p: P5) => void;

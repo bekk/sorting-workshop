@@ -11,6 +11,7 @@ import {
   checkSorted,
   VisualArrayImplementation,
 } from "./visualArray/visualArrayImplementation";
+import { setupMuteButton } from "./components/muteButton";
 
 export function run(p5: P5) {
   let array: number[];
@@ -35,7 +36,7 @@ export function run(p5: P5) {
     p5.createCanvas(1000, 800);
 
     audioManager = new AudioManager();
-    setupSoundSwitch(pubsub);
+    setupMuteButton(pubsub);
     rangeAndInput(document.getElementById("amountInput")!, {
       min: 0,
       max: 1000,
@@ -147,20 +148,6 @@ function shuffled(n: number) {
     .fill(null)
     .map((_, i) => i)
     .sort(() => Math.random() - 0.5);
-}
-
-function setupSoundSwitch(pubsub: PubSub) {
-  const soundSwitch = document.getElementById(
-    "soundSwitch"
-  ) as HTMLInputElement;
-  soundSwitch.addEventListener("change", (e) => {
-    const target = e.target as HTMLInputElement;
-    if (target.checked) {
-      pubsub.publish("mute");
-    } else {
-      pubsub.publish("unmute");
-    }
-  });
 }
 
 function setupAlgoSelect(pubsub: PubSub) {

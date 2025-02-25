@@ -5,6 +5,7 @@ interface RangeAndInputOptions {
   min: number;
   max: number;
   step: number;
+  roundingDigits?: number;
   onChange?: (value: number) => void;
 }
 
@@ -14,38 +15,40 @@ export function rangeAndInput(
 ) {
   const id = "customRange3";
 
-  target.innerHTML = html` <label for="${id}" class="form-label"
-      >Antall elementer</label
+  target.innerHTML = html` <div class="row g-0">
+    <label for="${id}" class="form-label mb-0">Antall elementer</label>
+    <div class="col-2">
+      <input
+        id="${id}"
+        class="form-control"
+        type="number"
+        aria-label="Amount (to the nearest dollar)"
+        style="border-top-right-radius: 0; border-bottom-right-radius: 0;"
+        value="${options.startingValue}"
+      />
+    </div>
+    <div
+      class="col d-flex align-items-center border border-start-0 rounded-2 px-2"
+      style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;"
     >
-    <div class="row g-1">
-      <div class="col-2">
-        <input
-          class="form-control"
-          type="text"
-          aria-label="Amount (to the nearest dollar)"
-        />
-      </div>
-      <div class="col-10 d-flex align-items-center">
-        <input
-          class="form-range vertical-align-middle"
-          type="range"
-          min="${options.min}"
-          max="${options.max}"
-          step="${options.step}"
-          id="${id}"
-        />
-      </div>
-    </div>`;
+      <input
+        class="form-range vertical-align-middle"
+        type="range"
+        min="${options.min}"
+        max="${options.max}"
+        step="${options.step}"
+        value="${options.startingValue}"
+      />
+    </div>
+  </div>`;
 
   const range = target.querySelector("input[type=range]") as HTMLInputElement;
-  const input = target.querySelector("input[type=text]") as HTMLInputElement;
-  range.value = options.startingValue.toString();
-  input.value = options.startingValue.toFixed(0);
+  const input = target.querySelector("input[type=number]") as HTMLInputElement;
 
   range.oninput = () => {
     const parsedValue = parseValue(range.value);
     if (parsedValue === undefined) return;
-    input.value = parsedValue.toFixed(0);
+    input.value = parsedValue.toFixed(options.roundingDigits ?? 0);
     options.onChange?.(parsedValue);
   };
 
@@ -57,7 +60,8 @@ export function rangeAndInput(
   };
 
   input.onblur = () => {
-    input.value = parseValue(input.value)?.toFixed(2) ?? "";
+    input.value =
+      parseValue(input.value)?.toFixed(options.roundingDigits ?? 0) ?? "";
   };
 
   input.onkeydown = (e) => {
