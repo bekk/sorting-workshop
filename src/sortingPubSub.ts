@@ -1,4 +1,5 @@
 import { PubSubBase } from "./pubsub/event";
+import { SortFunctionName } from "./sortFunctions";
 
 export type Events = {
   get: { index: number };
@@ -8,6 +9,7 @@ export type Events = {
   highlightOnce: { index: number; color: string };
   setHighlight: { index: number; color: string };
   clearHighlight: { index: number };
+  setSortAlgorithm: { algorithm: SortFunctionName };
   mute: undefined;
   unmute: undefined;
   cancelSort: undefined;

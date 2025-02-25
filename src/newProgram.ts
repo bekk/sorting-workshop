@@ -4,10 +4,14 @@ import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { checkSorted, VisualArray } from "./VisualArray";
 import { rangeAndInput } from "./components/rangeAndInput";
-import { bubbleSort } from "./bubbleSort";
+import { select } from "./components/select";
+import { sortFunctions } from "./sortFunctions/_registerSortFunctions";
+import { bubbleSort } from "./sortFunctions/bubbleSort";
+import { isSortFunctionName } from "./sortFunctions";
 
 export function run(p5: P5) {
   let array: number[];
+  let sortAlgorithm = bubbleSort;
   const tempHighlights: Map<number, P5.Color> = new Map();
   const highlights: Map<number, P5.Color> = new Map();
   const pubsub = new PubSub();
@@ -15,11 +19,17 @@ export function run(p5: P5) {
 
   function run() {
     const visualArray = new VisualArray(pubsub, array);
-    bubbleSort(visualArray).then(() => checkSorted(visualArray));
+    sortAlgorithm(visualArray).then(() => checkSorted(visualArray));
+  }
+
+  function reset() {
+    tempHighlights.clear();
+    highlights.clear();
+    pubsub.publish("cancelSort");
   }
 
   p5.setup = () => {
-    p5.createCanvas(800, 500);
+    p5.createCanvas(1000, 800);
 
     audioManager = new AudioManager();
     setupSoundSwitch(pubsub);
@@ -35,6 +45,7 @@ export function run(p5: P5) {
           .map((_, i) => value - i);
       },
     });
+    setupAlgoSelect(pubsub);
     array = shuffled(600);
     const frequencyMapper = getFrequencyMapper({
       minValue: Math.min(...array),
@@ -44,19 +55,19 @@ export function run(p5: P5) {
     });
 
     document.getElementById("runButton")!.addEventListener("click", () => {
-      pubsub.publish("cancelSort");
+      reset();
       pubsub.publish("startSort");
     });
     document.getElementById("stopButton")!.addEventListener("click", () => {
-      pubsub.publish("cancelSort");
+      reset();
     });
 
     document.getElementById("reverseButton")!.addEventListener("click", () => {
-      pubsub.publish("cancelSort");
+      reset();
       array = reversed(array.length);
     });
     document.getElementById("randomButton")!.addEventListener("click", () => {
-      pubsub.publish("cancelSort");
+      reset();
       array = shuffled(array.length);
     });
 
@@ -97,6 +108,12 @@ export function run(p5: P5) {
 
     pubsub.subscribe("mute", () => audioManager.enable());
     pubsub.subscribe("unmute", () => audioManager.disable());
+
+    pubsub.subscribe("setSortAlgorithm", ({ algorithm }) => {
+      console.log("setSortAlgorithm", algorithm);
+      sortAlgorithm = sortFunctions[algorithm];
+      reset();
+    });
   };
 
   p5.draw = () => {
@@ -140,5 +157,21 @@ function setupSoundSwitch(pubsub: PubSub) {
     } else {
       pubsub.publish("unmute");
     }
+  });
+}
+
+function setupAlgoSelect(pubsub: PubSub) {
+  const element = document.getElementById("algoSelect")!;
+  select(element, {
+    options: Object.entries(sortFunctions).map(([name, _]) => ({
+      value: name,
+      text: name,
+    })),
+    onChange: (algorithm: string) => {
+      if (!isSortFunctionName(algorithm)) {
+        throw new Error(`Invalid algorithm: ${algorithm}`);
+      }
+      pubsub.publish("setSortAlgorithm", { algorithm });
+    },
   });
 }

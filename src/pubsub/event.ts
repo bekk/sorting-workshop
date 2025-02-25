@@ -32,10 +32,10 @@ export class PubSubBase<TEventMap extends EventMap> {
     }
   }
 
-  async publish<T extends keyof TEventMap>(
+  publish<T extends keyof TEventMap>(
     type: T,
     ...args: TEventMap[T] extends undefined ? [] : [payload: TEventMap[T]]
-  ): Promise<void> {
+  ): void {
     const payload = args.length === 0 ? undefined : args[0];
 
     // Notify subscribers

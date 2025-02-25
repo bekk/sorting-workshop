@@ -1,4 +1,4 @@
-import { VisualArray } from "./VisualArray";
+import { VisualArray } from "../VisualArray";
 
 export async function bubbleSort(array: VisualArray) {
   for (let i = 0; i < array.length; i++) {
