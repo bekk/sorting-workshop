@@ -9,11 +9,14 @@ import {
 import { setupAlgoSelect } from "./components/algorithmSelect";
 import { setupInitTypeRadioButtons } from "./components/initTypeRadio";
 import { ArrayInitMethod, initializeArray } from "./arrayInitialize";
+import { setupImageTypeRadioButtons } from "./components/imageTypeRadio";
+import { ImageSortType } from "./imageType";
 
 export function run(p5: P5) {
+  let imageSortType: ImageSortType = "rows";
   let array: number[];
-  let bx = 5;
-  let by = 5;
+  let bx = 1;
+  let by = 1;
   let rows = 0;
   let cols = 0;
   let NBlocks = 0;
@@ -42,6 +45,12 @@ export function run(p5: P5) {
     const factor = Math.min(1280 / img.width, 720 / img.height);
     p5.resizeCanvas(img.width * factor, img.height * factor);
 
+    if (imageSortType === "rows") {
+      bx = img.width;
+    } else if (imageSortType === "columns") {
+      by = img.height;
+    }
+
     cols = Math.ceil(img.width / bx);
     rows = Math.ceil(img.height / by);
     NBlocks = cols * rows;
@@ -61,6 +70,7 @@ export function run(p5: P5) {
     p5.noSmooth(); // IMPORTANT: forces NEAREST filtering for textures in p5
     setupAlgoSelect(pubsub);
     setupInitTypeRadioButtons(pubsub);
+    setupImageTypeRadioButtons(pubsub);
     array = initializeArray(500, arrayInitMethod);
 
     document.getElementById("runButton")!.addEventListener("click", () => {
@@ -71,6 +81,24 @@ export function run(p5: P5) {
       reset();
     });
 
+    pubsub.subscribe("setImageSortType", ({ method }) => {
+      imageSortType = method;
+      if (method === "rows") {
+        bx = image.width;
+        by = 5;
+      } else if (method === "columns") {
+        bx = 5;
+        by = image.height;
+      } else {
+        bx = 5;
+        by = 5;
+      }
+      cols = Math.ceil(image.width / bx);
+      rows = Math.ceil(image.height / by);
+      NBlocks = cols * rows;
+      array = initializeArray(NBlocks, arrayInitMethod);
+      reset();
+    });
     pubsub.subscribe("startSort", () => run());
     pubsub.subscribe("setArrayInitMethod", ({ method }) => {
       arrayInitMethod = method;
