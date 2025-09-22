@@ -268,17 +268,5 @@ export function run(p5: P5) {
     p5.noStroke();
     // Ensure the geometry fills the viewport; p5 feeds normalized uv to the frag
     p5.rect(0, 0, p5.width, p5.height);
-    /*     const width = p5.width / array.length;
-    array.forEach((value, i) => {
-      p5.noStroke();
-      p5.fill(tempHighlights.get(i) ?? highlights.get(i) ?? p5.color(255));
-      p5.rect(
-        i * width,
-        p5.height,
-        width,
-        p5.map(value, 0, array.length, 0, -p5.height)
-      );
-    });
-    tempHighlights.clear(); */
   };
 }
