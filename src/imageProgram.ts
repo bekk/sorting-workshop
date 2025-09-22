@@ -12,11 +12,21 @@ import { ArrayInitMethod, initializeArray } from "./arrayInitialize";
 import { setupImageTypeRadioButtons } from "./components/imageTypeRadio";
 import { ImageSortType } from "./imageType";
 
+// en shrek kar
+const imagePath = "src/image/shrek.png";
+// en kjekk kar - man kan bruke URLer også (om CORS er ok)
+// const imagePath =
+//   "https://res.cloudinary.com/bekkimg/w_768,h_1024,c_fill,f_auto/d_default_image_departmentId2.png/1545";
+
+const rowSize = 1;
+const colSize = 1;
+const pixelBlockSize = 5;
+
 export function run(p5: P5) {
   let imageSortType: ImageSortType = "rows";
   let array: number[];
-  let bx = 1;
-  let by = 1;
+  let bx = rowSize;
+  let by = colSize;
   let rows = 0;
   let cols = 0;
   let NBlocks = 0;
@@ -39,14 +49,14 @@ export function run(p5: P5) {
 
   function updateBlockGeometry(method: ImageSortType, img: P5.Image) {
     if (method === "rows") {
-      bx = img.width; // entire row per block
-      by = 1;
+      bx = img.width;
+      by = rowSize;
     } else if (method === "columns") {
-      bx = 1;
-      by = img.height; // entire column per block
+      bx = colSize;
+      by = img.height;
     } else {
-      bx = 5;
-      by = 5; // NxN blocks
+      bx = pixelBlockSize;
+      by = pixelBlockSize;
     }
     cols = Math.ceil(img.width / bx);
     rows = Math.ceil(img.height / by);
@@ -67,13 +77,13 @@ export function run(p5: P5) {
   }
 
   let permImg: P5.Image;
-  const image = p5.loadImage("src/image/shrek.png", (img) => {
+  const image = p5.loadImage(imagePath, (img) => {
     fitCanvasToImage(img);
     updateBlockGeometry(imageSortType, img);
   });
 
   p5.setup = () => {
-    p5.createCanvas(1280, 720, p5.WEBGL);
+    p5.createCanvas(MAX_CANVAS.w, MAX_CANVAS.h, p5.WEBGL);
     p5.frameRate(120);
     p5.noSmooth(); // IMPORTANT: forces NEAREST filtering for textures in p5
     setupAlgoSelect(pubsub);
@@ -154,12 +164,13 @@ export function run(p5: P5) {
     updatePermutationTexture(array);
     tempHighlights.clear();
 
+    // bryr oss lite om farge (gray), men vil wipe til 0 alpha (transparent)
     p5.background(0, 0);
     p5.shader(theShader);
     theShader.setUniform("src", image);
     theShader.setUniform("permTex", permImg);
     theShader.setUniform("iResolution", [image.width, image.height]);
-    theShader.setUniform("blockSize", [bx, by]); // same as above
+    theShader.setUniform("blockSize", [bx, by]);
 
     // draw a full-screen quad
     p5.rectMode(p5.CENTER);
