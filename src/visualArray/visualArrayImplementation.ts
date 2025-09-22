@@ -25,6 +25,7 @@ export class VisualArrayImplementation implements VisualArray {
 
   private checkCancelled() {
     if (this.isCancelled) {
+      this.isCancelled = false;
       throw new Error("Operation cancelled");
     }
   }
@@ -86,8 +87,15 @@ export class VisualArrayImplementation implements VisualArray {
 }
 
 export async function checkSorted(array: VisualArray) {
+  let prev = -Infinity;
   for (let i = 0; i < array.length - 1; i++) {
-    await array.get(i);
-    array.setHighlight(i, "green");
+    let current = await array.get(i);
+    if (current >= prev) {
+      array.setHighlight(i, "green");
+    } else {
+      array.setHighlight(i - 1, "red");
+      array.setHighlight(i, "red");
+    }
+    prev = current;
   }
 }
