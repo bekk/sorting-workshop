@@ -81,8 +81,8 @@ void main() {
 
 export function run(p5: P5) {
   let array: number[];
-  const bx = 2;
-  const by = 2;
+  const bx = 5;
+  const by = 5;
   let NBlocks = 0;
   const theShader = p5.createShader(vert, frag);
   let sortAlgorithm = bubbleSort;
@@ -252,7 +252,7 @@ export function run(p5: P5) {
     theShader.setUniform("src", image);
     theShader.setUniform("permTex", permImg);
     theShader.setUniform("iResolution", [image.width, image.height]);
-    theShader.setUniform("blockSize", [30, 30]); // same as above
+    theShader.setUniform("blockSize", [bx, by]); // same as above
     theShader.setUniform("permTexWidth", NBlocks); // width of 1xN texture
 
     // draw a full-screen quad
