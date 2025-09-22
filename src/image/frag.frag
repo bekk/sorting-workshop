@@ -42,6 +42,12 @@ int fetchMappedIndex(vec2 block) {
     return int(hi * 256.0 + lo);                   // == (hi << 8) + lo, but float
 }
 
+float getHighlight(vec2 block) {
+    vec2 u = (block + 0.5) / sizeInBlocks();
+    vec4 px = texture2D(permTex, u);
+    return px.b;   // 0.0 or 1.0
+}
+
 void main() {
     vec2 fragCoord = vTexCoord * iResolution;
 
@@ -54,5 +60,7 @@ void main() {
     vec2 targetPixel = (targetBlock * blockSize) + fractional;
 
     gl_FragColor = texture2D(src, targetPixel / iResolution);
+    float highlight = getHighlight(thisBlock);
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1.0, 0.0, 0.0), highlight);
     //gl_FragColor = vec4(fragCoord / iResolution, 1.0, 1.0);
 }

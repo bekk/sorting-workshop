@@ -27,6 +27,34 @@ export function run(p5: P5) {
   const pubsub = new PubSub();
   let arrayInitMethod: ArrayInitMethod = "shuffled";
 
+  const MAX_CANVAS = { w: 1280, h: 720 };
+
+  function fitCanvasToImage(img: P5.Image) {
+    const factor = Math.min(
+      MAX_CANVAS.w / img.width,
+      MAX_CANVAS.h / img.height
+    );
+    p5.resizeCanvas(img.width * factor, img.height * factor);
+  }
+
+  function updateBlockGeometry(method: ImageSortType, img: P5.Image) {
+    if (method === "rows") {
+      bx = img.width; // entire row per block
+      by = 1;
+    } else if (method === "columns") {
+      bx = 1;
+      by = img.height; // entire column per block
+    } else {
+      bx = 5;
+      by = 5; // NxN blocks
+    }
+    cols = Math.ceil(img.width / bx);
+    rows = Math.ceil(img.height / by);
+    NBlocks = cols * rows;
+    array = initializeArray(NBlocks, arrayInitMethod);
+    makePermutationTexture(array);
+  }
+
   function run() {
     const visualArray = new VisualArrayImplementation(pubsub, array);
     sortAlgorithm(visualArray).then(() => checkSorted(visualArray));
@@ -40,28 +68,8 @@ export function run(p5: P5) {
 
   let permImg: P5.Image;
   const image = p5.loadImage("src/image/shrek.png", (img) => {
-    // fit canvas to image aspect ratio
-    // as big as possible, without exceeding 1280x720
-    const factor = Math.min(1280 / img.width, 720 / img.height);
-    p5.resizeCanvas(img.width * factor, img.height * factor);
-
-    if (imageSortType === "rows") {
-      bx = img.width;
-    } else if (imageSortType === "columns") {
-      by = img.height;
-    }
-
-    cols = Math.ceil(img.width / bx);
-    rows = Math.ceil(img.height / by);
-    NBlocks = cols * rows;
-    array = initializeArray(NBlocks, arrayInitMethod); // just to set NBlocks
-
-    // build an initial permutation (identity)
-    const perm = new Array(NBlocks);
-    for (let i = 0; i < NBlocks; i++) perm[i] = i;
-
-    // later, as your sorting algorithm runs, update perm to the current step
-    permImg = makePermutationTexture(perm);
+    fitCanvasToImage(img);
+    updateBlockGeometry(imageSortType, img);
   });
 
   p5.setup = () => {
@@ -83,27 +91,17 @@ export function run(p5: P5) {
 
     pubsub.subscribe("setImageSortType", ({ method }) => {
       imageSortType = method;
-      if (method === "rows") {
-        bx = image.width;
-        by = 5;
-      } else if (method === "columns") {
-        bx = 5;
-        by = image.height;
-      } else {
-        bx = 5;
-        by = 5;
+      if (image && image.width > 0) {
+        updateBlockGeometry(imageSortType, image);
       }
-      cols = Math.ceil(image.width / bx);
-      rows = Math.ceil(image.height / by);
-      NBlocks = cols * rows;
-      array = initializeArray(NBlocks, arrayInitMethod);
       reset();
     });
     pubsub.subscribe("startSort", () => run());
     pubsub.subscribe("setArrayInitMethod", ({ method }) => {
       arrayInitMethod = method;
       reset();
-      array = initializeArray(array.length, method);
+      array = initializeArray(NBlocks, arrayInitMethod);
+      updatePermutationTexture(array);
     });
 
     pubsub.subscribe("highlightOnce", ({ index, color }) => {
@@ -125,23 +123,24 @@ export function run(p5: P5) {
   };
 
   function makePermutationTexture(permArray: number[]) {
-    // permArray: JS array of ints in [0, NBlocks-1], length NBlocks
-    const w = cols;
-    const h = rows;
-    const tex = p5.createImage(w, h);
-    tex.loadPixels();
-    for (let i = 0; i < w * h; i++) {
+    permImg = p5.createImage(cols, rows);
+    updatePermutationTexture(permArray);
+  }
+
+  function updatePermutationTexture(permArray: number[]) {
+    permImg.loadPixels();
+    for (let i = 0; i < rows * cols; i++) {
       const v = permArray[i]; // target index
       const lo = v & 0xff; // low byte
       const hi = (v >> 8) & 0xff; // high byte
       const p = i * 4;
-      tex.pixels[p + 0] = lo; // R
-      tex.pixels[p + 1] = hi; // G
-      tex.pixels[p + 2] = 0; // B
-      tex.pixels[p + 3] = 255; // A
+      const highlight = tempHighlights.get(i);
+      permImg.pixels[p + 0] = lo; // R
+      permImg.pixels[p + 1] = hi; // G
+      permImg.pixels[p + 2] = highlight === undefined ? 0 : 255; // B
+      permImg.pixels[p + 3] = 255; // A
     }
-    tex.updatePixels();
-    return tex;
+    permImg.updatePixels();
   }
 
   p5.draw = () => {
@@ -150,13 +149,13 @@ export function run(p5: P5) {
     }
     if (array.length !== NBlocks) {
       array = initializeArray(NBlocks, arrayInitMethod);
-      permImg = makePermutationTexture(array);
+      makePermutationTexture(array);
     }
-    permImg = makePermutationTexture(array);
+    updatePermutationTexture(array);
+    tempHighlights.clear();
 
     p5.background(0, 0);
     p5.shader(theShader);
-    //p5.image(image, 0, 0, p5.width, p5.height);
     theShader.setUniform("src", image);
     theShader.setUniform("permTex", permImg);
     theShader.setUniform("iResolution", [image.width, image.height]);
@@ -165,7 +164,6 @@ export function run(p5: P5) {
     // draw a full-screen quad
     p5.rectMode(p5.CENTER);
     p5.noStroke();
-    // Ensure the geometry fills the viewport; p5 feeds normalized uv to the frag
     p5.rect(0, 0, p5.width, p5.height);
   };
 }
