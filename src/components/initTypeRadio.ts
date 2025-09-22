@@ -17,7 +17,7 @@ export function setupInitTypeRadioButtons(pubsub: PubSub) {
     >
       ${arrayInitMethods.map((method) => radio(method)).join("")}
     </div>`;
-  element.onchange = (event) => {
+  element.onclick = (event) => {
     const target = event.target as HTMLInputElement;
     if (target.type === "radio" && target.checked) {
       if (!isArrayInitMethod(target.id)) {
