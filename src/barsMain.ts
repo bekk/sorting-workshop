@@ -1,4 +1,4 @@
-import { run } from "./newProgram.ts";
+import { run } from "./barsProgram.ts";
 import "./style.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import P5 from "p5";
