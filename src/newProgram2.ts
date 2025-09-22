@@ -24,7 +24,6 @@ uniform sampler2D src;        // original image
 uniform sampler2D permTex;    // 1xN permutation texture
 uniform vec2 iResolution;     // [img.width, img.height]
 uniform vec2 blockSize;       // e.g. [10.0, 10.0]
-uniform float permTexWidth;   // number of blocks (N)
 
 vec2 sizeInBlocks() {
     return ceil(iResolution / blockSize);
@@ -43,9 +42,17 @@ vec2 indexToBlock(int index) {
 
 // Decode target index from two 8-bit channels stored in permTex.
 // px.r = low byte, px.g = high byte (both 0..1)
-int fetchMappedIndex(int index) {
+/* int fetchMappedIndex(int index) {
     float u = (float(index) + 0.5) / permTexWidth;   // sample center of texel
     vec4 px = texture2D(permTex, vec2(u, 0.5));
+    float lo = floor(px.r * 255.0 + 0.5);
+    float hi = floor(px.g * 255.0 + 0.5);
+    return int(hi * 256.0 + lo);                   // == (hi << 8) + lo, but float
+} */
+
+int fetchMappedIndex(vec2 block) {
+    vec2 u = (block + 0.5) / sizeInBlocks();   // sample center of texel
+    vec4 px = texture2D(permTex, u);
     float lo = floor(px.r * 255.0 + 0.5);
     float hi = floor(px.g * 255.0 + 0.5);
     return int(hi * 256.0 + lo);                   // == (hi << 8) + lo, but float
@@ -56,7 +63,7 @@ void main() {
 
     vec2 thisBlock   = floor(fragCoord / blockSize);
     int  thisIndex   = blockToIndex(thisBlock);
-    int  targetIndex = fetchMappedIndex(thisIndex);
+    int  targetIndex = fetchMappedIndex(thisBlock);
 
     vec2 targetBlock = indexToBlock(targetIndex);
     vec2 fractional  = mod(fragCoord, blockSize);
@@ -83,6 +90,8 @@ export function run(p5: P5) {
   let array: number[];
   const bx = 5;
   const by = 5;
+  let rows = 0;
+  let cols = 0;
   let NBlocks = 0;
   const theShader = p5.createShader(vert, frag);
   let sortAlgorithm = bubbleSort;
@@ -110,8 +119,8 @@ export function run(p5: P5) {
     const factor = Math.min(1280 / img.width, 720 / img.height);
     p5.resizeCanvas(img.width * factor, img.height * factor);
 
-    const cols = Math.ceil(img.width / bx);
-    const rows = Math.ceil(img.height / by);
+    cols = Math.ceil(img.width / bx);
+    rows = Math.ceil(img.height / by);
     NBlocks = cols * rows;
     array = initializeArray(NBlocks, arrayInitMethod); // just to set NBlocks
 
@@ -218,11 +227,11 @@ export function run(p5: P5) {
 
   function makePermutationTexture(permArray: number[]) {
     // permArray: JS array of ints in [0, NBlocks-1], length NBlocks
-    const w = permArray.length;
-    const h = 1;
+    const w = cols;
+    const h = rows;
     const tex = p5.createImage(w, h);
     tex.loadPixels();
-    for (let i = 0; i < w; i++) {
+    for (let i = 0; i < w * h; i++) {
       const v = permArray[i]; // target index
       const lo = v & 0xff; // low byte
       const hi = (v >> 8) & 0xff; // high byte
@@ -253,7 +262,6 @@ export function run(p5: P5) {
     theShader.setUniform("permTex", permImg);
     theShader.setUniform("iResolution", [image.width, image.height]);
     theShader.setUniform("blockSize", [bx, by]); // same as above
-    theShader.setUniform("permTexWidth", NBlocks); // width of 1xN texture
 
     // draw a full-screen quad
     p5.rectMode(p5.CENTER);
