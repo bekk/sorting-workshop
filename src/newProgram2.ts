@@ -1,6 +1,4 @@
 import P5 from "p5";
-import { AudioManager } from "./AudioManager";
-import { frequencyMapper as getFrequencyMapper } from "./frequencyMapper";
 import { PubSub } from "./sortingPubSub";
 import { rangeAndInput } from "./components/rangeAndInput";
 import { sortFunctions } from "./sortFunctions/_registerSortFunctions";
@@ -98,7 +96,6 @@ export function run(p5: P5) {
   const tempHighlights: Map<number, P5.Color> = new Map();
   const highlights: Map<number, P5.Color> = new Map();
   const pubsub = new PubSub();
-  let audioManager: AudioManager;
   let arrayInitMethod: ArrayInitMethod = "shuffled";
 
   function run() {
@@ -136,7 +133,6 @@ export function run(p5: P5) {
     p5.createCanvas(1280, 720, p5.WEBGL);
     p5.noSmooth(); // IMPORTANT: forces NEAREST filtering for textures in p5
 
-    audioManager = new AudioManager();
     setupMuteButton(pubsub);
     rangeAndInput(document.getElementById("amountInput")!, {
       min: 0,
@@ -151,12 +147,6 @@ export function run(p5: P5) {
     setupAlgoSelect(pubsub);
     setupInitTypeRadioButtons(pubsub);
     array = initializeArray(500, arrayInitMethod);
-    const frequencyMapper = getFrequencyMapper({
-      minValue: Math.min(...array),
-      maxValue: Math.max(...array),
-      minFrequency: 400,
-      maxFrequency: 2000,
-    });
 
     document.getElementById("runButton")!.addEventListener("click", () => {
       reset();
@@ -184,40 +174,6 @@ export function run(p5: P5) {
     pubsub.subscribe("clearHighlight", ({ index }) => {
       highlights.delete(index);
     });
-
-    pubsub.subscribe("set", ({ index }) => {
-      const frequency = frequencyMapper(array[index]);
-      audioManager.play({ frequency, durationMs: 10 });
-    });
-
-    pubsub.subscribe("get", ({ index }) => {
-      const frequency = frequencyMapper(array[index]);
-      audioManager.play({ frequency, durationMs: 10 });
-    });
-
-    pubsub.subscribe("swap", ({ i, j }) => {
-      audioManager.play({
-        frequency: frequencyMapper(array[i]),
-        durationMs: 10,
-      });
-      audioManager.play({
-        frequency: frequencyMapper(array[j]),
-        durationMs: 10,
-      });
-    });
-    pubsub.subscribe("compare", ({ i, j }) => {
-      audioManager.play({
-        frequency: frequencyMapper(array[i]),
-        durationMs: 10,
-      });
-      audioManager.play({
-        frequency: frequencyMapper(array[j]),
-        durationMs: 10,
-      });
-    });
-
-    pubsub.subscribe("mute", () => audioManager.enable());
-    pubsub.subscribe("unmute", () => audioManager.disable());
 
     pubsub.subscribe("setSortAlgorithm", ({ algorithm }) => {
       sortAlgorithm = sortFunctions[algorithm];
