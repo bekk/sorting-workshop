@@ -40,7 +40,7 @@ export class VisualArrayImplementation implements VisualArray {
   async set(i: number, value: number): Promise<void> {
     this.assertIndex(i);
     this.pubsub.publish("set", { index: i, value });
-    await this.wait();
+    await this.wait(0);
     this.array[i] = value;
   }
 
@@ -60,7 +60,7 @@ export class VisualArrayImplementation implements VisualArray {
     this.pubsub.publish("swap", { i, j });
     this.highlightOnce(i);
     this.highlightOnce(j);
-    await this.wait();
+    await this.wait(0);
     [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
   }
 
