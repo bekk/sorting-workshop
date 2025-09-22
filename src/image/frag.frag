@@ -61,6 +61,5 @@ void main() {
 
     gl_FragColor = texture2D(src, targetPixel / iResolution);
     float highlight = getHighlight(thisBlock);
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1.0, 0.0, 0.0), highlight);
-    //gl_FragColor = vec4(fragCoord / iResolution, 1.0, 1.0);
+    gl_FragColor = mix(gl_FragColor, vec4(1.0, 0.0, 0.0, 1.0), highlight);
 }
