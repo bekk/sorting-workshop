@@ -10,78 +10,6 @@ import { setupAlgoSelect } from "./components/algorithmSelect";
 import { setupInitTypeRadioButtons } from "./components/initTypeRadio";
 import { ArrayInitMethod, initializeArray } from "./arrayInitialize";
 
-const frag = `#ifdef GL_ES
-precision highp float;
-precision highp int;
-#endif
-
-varying vec2 vTexCoord;
-uniform sampler2D src;        // original image
-uniform sampler2D permTex;    // 1xN permutation texture
-uniform vec2 iResolution;     // [img.width, img.height]
-uniform vec2 blockSize;       // e.g. [10.0, 10.0]
-
-vec2 sizeInBlocks() {
-    return ceil(iResolution / blockSize);
-}
-
-int blockToIndex(vec2 block) {
-    vec2 sb = sizeInBlocks();
-    return int(sb.x * block.y + block.x);
-}
-
-vec2 indexToBlock(int index) {
-    vec2 sb = sizeInBlocks();
-    float f = float(index);
-    return vec2(mod(f, sb.x), floor(f / sb.x));
-}
-
-// Decode target index from two 8-bit channels stored in permTex.
-// px.r = low byte, px.g = high byte (both 0..1)
-/* int fetchMappedIndex(int index) {
-    float u = (float(index) + 0.5) / permTexWidth;   // sample center of texel
-    vec4 px = texture2D(permTex, vec2(u, 0.5));
-    float lo = floor(px.r * 255.0 + 0.5);
-    float hi = floor(px.g * 255.0 + 0.5);
-    return int(hi * 256.0 + lo);                   // == (hi << 8) + lo, but float
-} */
-
-int fetchMappedIndex(vec2 block) {
-    vec2 u = (block + 0.5) / sizeInBlocks();   // sample center of texel
-    vec4 px = texture2D(permTex, u);
-    float lo = floor(px.r * 255.0 + 0.5);
-    float hi = floor(px.g * 255.0 + 0.5);
-    return int(hi * 256.0 + lo);                   // == (hi << 8) + lo, but float
-}
-
-void main() {
-    vec2 fragCoord   = vTexCoord * iResolution;
-
-    vec2 thisBlock   = floor(fragCoord / blockSize);
-    int  thisIndex   = blockToIndex(thisBlock);
-    int  targetIndex = fetchMappedIndex(thisBlock);
-
-    vec2 targetBlock = indexToBlock(targetIndex);
-    vec2 fractional  = mod(fragCoord, blockSize);
-    vec2 targetPixel = (targetBlock * blockSize) + fractional;
-
-    gl_FragColor = texture2D(src, targetPixel / iResolution);
-    //gl_FragColor = vec4(fragCoord / iResolution, 1.0, 1.0);
-}
-`;
-
-const vert = `attribute vec3 aPosition;
-attribute vec2 aTexCoord;
-varying vec2 vTexCoord;
-
-void main() {
-  vTexCoord = aTexCoord;
-  vec4 positionVec4 = vec4(aPosition, 1.0);
-  positionVec4.xy = positionVec4.xy * 2.0 - 1.0; // map [0,1] -> [-1,1]
-  positionVec4.y *= -1.0; // flip y for WebGL coords
-  gl_Position = positionVec4;
-}`;
-
 export function run(p5: P5) {
   let array: number[];
   let bx = 5;
@@ -89,7 +17,7 @@ export function run(p5: P5) {
   let rows = 0;
   let cols = 0;
   let NBlocks = 0;
-  const theShader = p5.createShader(vert, frag);
+  const theShader = p5.loadShader("src/image/vert.vert", "src/image/frag.frag");
   let sortAlgorithm = bubbleSort;
   const tempHighlights: Map<number, P5.Color> = new Map();
   const highlights: Map<number, P5.Color> = new Map();
@@ -108,7 +36,7 @@ export function run(p5: P5) {
   }
 
   let permImg: P5.Image;
-  const image = p5.loadImage("src/shrek.png", (img) => {
+  const image = p5.loadImage("src/image/shrek.png", (img) => {
     // fit canvas to image aspect ratio
     // as big as possible, without exceeding 1280x720
     const factor = Math.min(1280 / img.width, 720 / img.height);
@@ -129,6 +57,7 @@ export function run(p5: P5) {
 
   p5.setup = () => {
     p5.createCanvas(1280, 720, p5.WEBGL);
+    p5.frameRate(120);
     p5.noSmooth(); // IMPORTANT: forces NEAREST filtering for textures in p5
     setupAlgoSelect(pubsub);
     setupInitTypeRadioButtons(pubsub);
