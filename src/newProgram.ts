@@ -36,6 +36,7 @@ export function run(p5: P5) {
 
   p5.setup = () => {
     p5.createCanvas(1000, 720);
+    p5.frameRate(120);
 
     audioManager = new AudioManager();
     setupMuteButton(pubsub);

@@ -1,13 +1,11 @@
 import P5 from "p5";
 import { PubSub } from "./sortingPubSub";
-import { rangeAndInput } from "./components/rangeAndInput";
 import { sortFunctions } from "./sortFunctions/_registerSortFunctions";
 import { bubbleSort } from "./sortFunctions/bubbleSort";
 import {
   checkSorted,
   VisualArrayImplementation,
 } from "./visualArray/visualArrayImplementation";
-import { setupMuteButton } from "./components/muteButton";
 import { setupAlgoSelect } from "./components/algorithmSelect";
 import { setupInitTypeRadioButtons } from "./components/initTypeRadio";
 import { ArrayInitMethod, initializeArray } from "./arrayInitialize";
@@ -86,8 +84,8 @@ void main() {
 
 export function run(p5: P5) {
   let array: number[];
-  const bx = 5;
-  const by = 5;
+  let bx = 5;
+  let by = 5;
   let rows = 0;
   let cols = 0;
   let NBlocks = 0;
@@ -132,18 +130,6 @@ export function run(p5: P5) {
   p5.setup = () => {
     p5.createCanvas(1280, 720, p5.WEBGL);
     p5.noSmooth(); // IMPORTANT: forces NEAREST filtering for textures in p5
-
-    setupMuteButton(pubsub);
-    rangeAndInput(document.getElementById("amountInput")!, {
-      min: 0,
-      max: 1000,
-      step: 1,
-      startingValue: 500,
-      onChange: (value) => {
-        pubsub.publish("cancelSort");
-        array = initializeArray(value, arrayInitMethod);
-      },
-    });
     setupAlgoSelect(pubsub);
     setupInitTypeRadioButtons(pubsub);
     array = initializeArray(500, arrayInitMethod);
