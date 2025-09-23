@@ -13,17 +13,30 @@ import { setupImageTypeRadioButtons } from "./components/imageTypeRadio";
 import { ImageSortType } from "./imageType";
 
 // en shrek kar
-const imagePath = "src/image/shrek.png";
-// en kjekk kar - man kan bruke URLer også (om CORS er ok)
-// const imagePath =
-//   "https://res.cloudinary.com/bekkimg/w_768,h_1024,c_fill,f_auto/d_default_image_departmentId2.png/1545";
+// const imagePath = "src/image/shrek.png";
+// mange kjekke folk
+const algpip = [
+  208, // Joakim
+  1179, // Fredrik
+  1219, // Håvard
+  1545, // Sondre
+  1568, // Torjus
+  1635, // Bernt
+  1645, // Thomas
+  1764, // Silje
+  1848, // Even
+  1885, // Martin
+];
+const imagePath = `https://res.cloudinary.com/bekkimg/w_768,h_1024,c_fill,f_auto/d_default_image_departmentId2.png/${
+  algpip[Math.floor(Math.random() * algpip.length)]
+}`;
 
 const rowSize = 1;
 const colSize = 1;
-const pixelBlockSize = 5;
+const pixelBlockSize = 15;
 
 export function run(p5: P5) {
-  let imageSortType: ImageSortType = "rows";
+  let imageSortType: ImageSortType = "pixels";
   let array: number[];
   let bx = rowSize;
   let by = colSize;

@@ -34,7 +34,7 @@ function radio(method: ImageSortType): string {
       class="btn-check"
       name="image-sort"
       id="${method}"
-      ${method === "rows" ? "checked" : ""}
+      ${method === "pixels" ? "checked" : ""}
       autocomplete="off"
     />
     <label class="btn btn-outline-primary" for="${method}"
